@@ -1,10 +1,12 @@
 package Jair.rh.cotrolador;
 
+import Jair.rh.exepcion.RecursoNoEncontradoExepcion;
 import Jair.rh.modelo.Empleado;
 import Jair.rh.servicio.IEmpleadoServicio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,11 +27,24 @@ public class EmpleadoControlador {
         empleados.forEach((empleado -> logger.info(empleado.toString())));
         return empleados;
     }
+
     @PostMapping("/empleados")
-    public Empleado agregarEmpleado(@RequestBody Empleado empleado){
-        logger.info("Empleado a agregar "+empleado);
+    public Empleado agregarEmpleado(@RequestBody Empleado empleado) {
+        logger.info("Empleado a agregar " + empleado);
         return empleadoServicio.guardarEmpleado(empleado);
     }
 
-
+    @GetMapping("/empleados/{id}")
+    public ResponseEntity<Empleado> buscarEmpleadoPorId(@PathVariable Integer id) {
+        Empleado empleado = empleadoServicio.buscarEmpleadoPorId(id);
+        if (empleado == null)
+            throw new RecursoNoEncontradoExepcion("No se encontró el empleado con id " + id);
+        return ResponseEntity.ok(empleado);
+    }
+    @DeleteMapping("/empleados/{id}")
+    public ResponseEntity<Empleado> eliminarEmpleado(@PathVariable Integer id){
+        Empleado empleado=empleadoServicio.buscarEmpleadoPorId(id);
+        empleadoServicio.eliminarEmpleado(empleado);
+        return ResponseEntity.ok(empleado);
+    }
 }
